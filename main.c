@@ -2,12 +2,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+typedef struct Room
+{
+    int xPosition;
+    int yPosition;
+    int height;
+    int width;
+    //
+    //Monster ** monsters;
+    //Item ** items;
+
+} Room;
+
+
 
 typedef struct Player // Player struct. Position and HP
 {
     int xPosition;
     int yPosition;
     int health;
+    //Room * room;
 } Player;
 
 int playerMove(int y, int x, Player * user);
@@ -17,8 +31,12 @@ int playerMove(int y, int x, Player * user);
 
 int checkPosition(int newY, int newX, Player * user);
 int screenSetUp();
-int mapSetUp();
+int drawRoom(Room * room);
+Room ** mapSetUp();
 Player * playerSetup();
+
+/*Room Functions */
+Room * createRoom(int x, int y, int height, int width); //Create a room
 
 int main()
 {
@@ -57,38 +75,65 @@ int screenSetUp() //Creating ncurses game
     return 1;
 }
 
-int mapSetUp() // function for creating the map
+Room ** mapSetUp() // function for creating the map
 {
-    // move cursor to x13 y13 and build a ceiling
-    mvprintw(13, 13, "--------"); //y, x, "string"
-    //show that this is a room with two horizontal walls with 6 spaces (4)
-    mvprintw(14, 13, "|......|"); //y, x, "string"
-    mvprintw(15, 13, "|......|"); //y, x, "string"
-    mvprintw(16, 13, "|......|"); //y, x, "string"
-    mvprintw(17, 13, "|......|"); //y, x, "string"
-    //Another ceiling yo
-    mvprintw(18, 13, "--------"); //y, x, "string"
+    Room ** rooms;
+    rooms = malloc(sizeof(Room)* 6);
 
-    // move cursor to x13 y13 and build a ceiling
-    mvprintw(2, 40, "--------"); //y, x, "string"
-    //show that this is a room with two horizontal walls with 6 spaces (4)
-    mvprintw(3, 40, "|......|"); //y, x, "string"
-    mvprintw(4, 40, "|......|"); //y, x, "string"
-    mvprintw(5, 40, "|......|"); //y, x, "string"
-    mvprintw(6, 40, "|......|"); //y, x, "string"
-    //Another ceiling yo
-    mvprintw(7, 40, "--------"); //y, x, "string"
+    rooms[0] = createRoom(13, 13, 6, 8);
+    drawRoom(rooms[0]);
 
+    rooms[1] = createRoom(40, 2, 6, 8);
+    drawRoom(rooms[1]);
 
-    // move cursor to x13 y13 and build a ceiling
-    mvprintw(10, 40, "--------"); //y, x, "string"
-    //show that this is a room with two horizontal walls with 6 spaces (4)
-    mvprintw(11, 40, "|......|"); //y, x, "string"
-    mvprintw(12, 40, "|......|"); //y, x, "string"
-    mvprintw(13, 40, "|......|"); //y, x, "string"
-    mvprintw(14, 40, "|......|"); //y, x, "string"
-    //Another ceiling yo
-    mvprintw(15, 40, "--------"); //y, x, "string"
+    rooms[2] = createRoom(40, 10, 6, 12);
+    drawRoom(rooms[2]);
+
+    return rooms;
+}
+
+Room * createRoom(int x, int y, int height, int width)
+{
+    Room * newRoom;
+    newRoom = malloc(sizeof(Room));
+
+    newRoom->xPosition = x;
+    newRoom->yPosition = y;
+    newRoom->height = height;
+    newRoom->width = width;
+
+    return newRoom;
+}
+
+int drawRoom(Room * room)
+{
+    int x;
+    int y;
+
+    /*Draw top and Bottom*/
+    for (x = room->xPosition; x < room->xPosition + room->width; x++)
+    {
+        mvprintw(room->yPosition, x, "-");
+        mvprintw(room->yPosition + room->height - 1, x, "-"); // Goes down height positions and print horizontally
+    }
+
+    /*Draw floors and the side walls */
+    for(y = room->yPosition + 1; y < room->yPosition + room->height - 1; y++) // y is initialized to 1 below itself, and then it draws until it has reached its height
+    {
+        //draw side walls
+        mvprintw(y, room->xPosition, "|");
+        mvprintw(y, room->xPosition + room->width - 1, "|");
+
+        //Draw Floors
+        //Start 1 right from x, print . until the next wall which is xpos + width - 1
+        for (x = room->xPosition + 1; x < room->xPosition + room->width - 1; x++)
+        {
+            mvprintw(y, x, ".");
+        }
+
+    }
+
+    return 0;
 }
 
 Player * playerSetup()
@@ -162,6 +207,7 @@ int checkPosition(int newY, int newX, Player * user)
     }
 
 }
+
 
 int playerMove(int y, int x, Player * user)
 {
