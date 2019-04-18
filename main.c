@@ -1,6 +1,8 @@
 #include <ncurses.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+
 typedef struct Player // Player struct. Position and HP
 {
     int xPosition;
@@ -13,7 +15,7 @@ int playerMove(int y, int x, Player * user);
 
 
 
-
+int checkPosition(int newY, int newX, Player * user);
 int screenSetUp();
 int mapSetUp();
 Player * playerSetup();
@@ -94,41 +96,45 @@ Player * playerSetup()
     Player * newPlayer; //Create new Player named newPlayer
     newPlayer = malloc(sizeof(Player)); // Create the memory for newPlayer pointer
 
-    //
+    //init player loc/hp
+    newPlayer->health = 20;
     newPlayer->xPosition = 14;
     newPlayer->yPosition = 14;
-    newPlayer->health = 20;
-
-    //
-    mvprintw(newPlayer->yPosition, newPlayer->xPosition, "@"); // Print @ at players location
-    move(newPlayer->yPosition, newPlayer->xPosition); //Moves the cursor to players location
+    //initial player spawn
+    playerMove(14, 14, newPlayer);
 
     return newPlayer;
 }
 
 int handleInput(int input, Player * user)
 {
+    int newY;
+    int newX;
     switch (input)
     {
         //move up
         case 'w':
         case 'W':
-            playerMove(user->yPosition - 1, user->xPosition, user);
+            newY = user->yPosition - 1;
+            newX = user->xPosition;
             break;
         //move down
         case 's':
         case 'S':
-            playerMove(user->yPosition + 1, user->xPosition, user);
+            newY = user->yPosition + 1;
+            newX = user->xPosition;
             break;
         //move left
         case 'a':
         case 'A':
-            playerMove(user->yPosition, user->xPosition - 1, user);
+            newY = user->yPosition;
+            newX = user->xPosition - 1;
             break;
         //move right
         case 'd':
         case 'D':
-            playerMove(user->yPosition, user->xPosition + 1, user);
+            newY = user->yPosition;
+            newX = user->xPosition + 1;
             break;
 
         default:
@@ -136,15 +142,34 @@ int handleInput(int input, Player * user)
 
 
     }
+    checkPosition(newY, newX, user);
+
+}
+//Checks what is at next position
+int checkPosition(int newY, int newX, Player * user)
+{
+    int space;
+    switch (mvinch(newY, newX)) //Finds the new place to move
+    {
+        case '.': // If it is a ., move to it
+            playerMove(newY, newX, user);
+            break;
+
+        default: // If it is not a ., c
+            move(user->yPosition, user->xPosition);
+            break;
+
+    }
+
 }
 
 int playerMove(int y, int x, Player * user)
 {
-    mvprintw(user->yPosition, user->xPosition, ".");
+    mvprintw(user->yPosition, user->xPosition, "."); //Print a '.' where the user currently is
 
-    user->xPosition = x;
+    user->xPosition = x; //Set new position for user
     user->yPosition = y;
 
-    mvprintw(user->yPosition, user->xPosition, "@");
-    move(user->yPosition, user->xPosition);
+    mvprintw(user->yPosition, user->xPosition, "@"); // Set users pic
+    move(user->yPosition, user->xPosition); //Move cursor to current users position
 }
