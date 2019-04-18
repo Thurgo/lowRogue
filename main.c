@@ -8,6 +8,7 @@ typedef struct Player // Player struct. Position and HP
     int health;
 } Player;
 
+int playerMove(int y, int x, Player * user);
 
 
 
@@ -19,16 +20,19 @@ Player * playerSetup();
 
 int main()
 {
+    //Setup
     int ch;
     Player * user; //init user
     screenSetUp(); // Starts game
     mapSetUp(); // Renders map
-
     user = playerSetup();
+    int handleInput(int input, Player * user);
 
+
+    //Main game setup
     while ((ch = getch()) != 'z') //When user enters char z end game
     {
-
+        handleInput(ch, user);
     }
 
 
@@ -48,7 +52,7 @@ int screenSetUp() //Creating ncurses game
     noecho(); // Dont repeat back what user types. Cannot play game without this on
     refresh(); //I think  that this wipes the screen!
 
-    return 0;
+    return 1;
 }
 
 int mapSetUp() // function for creating the map
@@ -100,4 +104,47 @@ Player * playerSetup()
     move(newPlayer->yPosition, newPlayer->xPosition); //Moves the cursor to players location
 
     return newPlayer;
+}
+
+int handleInput(int input, Player * user)
+{
+    switch (input)
+    {
+        //move up
+        case 'w':
+        case 'W':
+            playerMove(user->yPosition - 1, user->xPosition, user);
+            break;
+        //move down
+        case 's':
+        case 'S':
+            playerMove(user->yPosition + 1, user->xPosition, user);
+            break;
+        //move left
+        case 'a':
+        case 'A':
+            playerMove(user->yPosition, user->xPosition - 1, user);
+            break;
+        //move right
+        case 'd':
+        case 'D':
+            playerMove(user->yPosition, user->xPosition + 1, user);
+            break;
+
+        default:
+            break;
+
+
+    }
+}
+
+int playerMove(int y, int x, Player * user)
+{
+    mvprintw(user->yPosition, user->xPosition, ".");
+
+    user->xPosition = x;
+    user->yPosition = y;
+
+    mvprintw(user->yPosition, user->xPosition, "@");
+    move(user->yPosition, user->xPosition);
 }
