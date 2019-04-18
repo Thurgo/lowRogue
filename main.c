@@ -20,13 +20,13 @@ Player * playerSetup();
 int main()
 {
     int ch;
-    Player * user;
+    Player * user; //init user
     screenSetUp(); // Starts game
-    mapSetUp();
+    mapSetUp(); // Renders map
 
     user = playerSetup();
 
-    while ((ch = getch()) != 'z')
+    while ((ch = getch()) != 'z') //When user enters char z end game
     {
 
     }
@@ -45,7 +45,7 @@ int screenSetUp() //Creating ncurses game
 {
     initscr(); //Start screen
     printw("Hello World!\n"); //Print to console
-    noecho(); // Dont repeat back what user types
+    noecho(); // Dont repeat back what user types. Cannot play game without this on
     refresh(); //I think  that this wipes the screen!
 
     return 0;
@@ -87,8 +87,8 @@ int mapSetUp() // function for creating the map
 
 Player * playerSetup()
 {
-    Player * newPlayer;
-    newPlayer = malloc(sizeof(Player));
+    Player * newPlayer; //Create new Player named newPlayer
+    newPlayer = malloc(sizeof(Player)); // Create the memory for newPlayer pointer
 
     //
     newPlayer->xPosition = 14;
@@ -96,8 +96,8 @@ Player * playerSetup()
     newPlayer->health = 20;
 
     //
-    mvprintw(newPlayer->yPosition, newPlayer->xPosition, "@");
-    move(newPlayer->yPosition, newPlayer->xPosition);
+    mvprintw(newPlayer->yPosition, newPlayer->xPosition, "@"); // Print @ at players location
+    move(newPlayer->yPosition, newPlayer->xPosition); //Moves the cursor to players location
 
     return newPlayer;
 }
