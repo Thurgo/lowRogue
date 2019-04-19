@@ -46,6 +46,7 @@ int playerMove(int y, int x, Player * user);
 int checkPosition(int newY, int newX, Player * user);
 int screenSetUp();
 int drawRoom(Room * room);
+int connectDoors(Position * doorOne, Position * doorTwo);
 Room ** mapSetUp();
 Player * playerSetup();
 
@@ -102,7 +103,7 @@ Room ** mapSetUp() // function for creating the map
 
     rooms[2] = createRoom(40, 10, 6, 12);
     drawRoom(rooms[2]);
-
+    connectDoors(rooms[0]->doors[3], rooms[2]->doors[1]);
     return rooms;
 }
 
@@ -124,14 +125,14 @@ Room * createRoom(int x, int y, int height, int width)
     newRoom->doors[0] = malloc(sizeof(Position));
     newRoom->doors[0]->x = rand() % (width - 2) + newRoom->position.x + 1; // Subtract 1 from width SO that you never hit the wall and have a door in a corner. also add 1 to the x so the same thing doesnt happen on the other side
     newRoom->doors[0]->y = newRoom->position.y;
-    //BOTTOM DOOR
-    newRoom->doors[1] = malloc(sizeof(Position));
-    newRoom->doors[1]->x = rand() % (width - 2) + newRoom->position.x + 1;
-    newRoom->doors[1]->y = newRoom->position.y + newRoom->height - 1;
     //LEFT DOOR
+    newRoom->doors[1] = malloc(sizeof(Position));
+    newRoom->doors[1]->y = rand() % (height - 2) + newRoom->position.y + 1;
+    newRoom->doors[1]->x = newRoom->position.x;
+    //BOTTOM DOOR
     newRoom->doors[2] = malloc(sizeof(Position));
-    newRoom->doors[2]->y = rand() % (height - 2) + newRoom->position.y + 1;
-    newRoom->doors[2]->x = newRoom->position.x;
+    newRoom->doors[2]->x = rand() % (width - 2) + newRoom->position.x + 1;
+    newRoom->doors[2]->y = newRoom->position.y + newRoom->height - 1;
     //RIGHT DOOR
     newRoom->doors[3] = malloc(sizeof(Position));
     newRoom->doors[3]->y = rand() % (height - 2) + newRoom->position.y + 1;
@@ -175,6 +176,64 @@ int drawRoom(Room * room)
     mvprintw(room->doors[3]->y, room->doors[3]->x, "+");
 
     return 0;
+}
+
+int connectDoors(Position * doorOne, Position * doorTwo)
+{
+    Position temp;
+    Position previous;
+    int count = 0;
+    temp.x = doorOne->x;
+    temp.y = doorOne->y;
+
+    previous = temp;
+
+    while (1)
+    {
+        //step left
+        if ((abs((temp.x - 1) - doorTwo->x) < abs(temp.x - doorTwo->x)) && (mvinch(temp.y, temp.x - 1) == ' '))
+        {
+            previous.x = temp.x;
+            temp.x = temp.x-1;
+        }
+        //step right
+        else if ((abs((temp.x + 1) - doorTwo->x) < abs(temp.x - doorTwo->x)) && (mvinch(temp.y, temp.x + 1) == ' '))
+        {
+            previous.x = temp.x;
+            temp.x = temp.x + 1;
+        }
+        //step down
+        else if ((abs((temp.y + 1) - doorTwo->y) < abs(temp.y - doorTwo->y)) && (mvinch(temp.y + 1, temp.x) == ' '))
+        {
+            previous.y = temp.y;
+            temp.y = temp.y + 1;
+        }
+        //step up
+        else if ((abs((temp.y - 1) - doorTwo->y) < abs(temp.y - doorTwo->y)) && (mvinch(temp.y - 1, temp.x) == ' '))
+        {
+            previous.y = temp.y;
+            temp.y = temp.y - 1;
+        }
+        else
+        {
+            if (count == 0)
+            {
+                temp = previous;
+                count++;
+                continue;
+            }
+            else
+            {
+                return 0;
+            }
+
+        }
+        mvprintw(temp.y, temp.x, "#");
+        getch();
+    }
+
+
+    return 1;
 }
 
 Player * playerSetup()
@@ -237,7 +296,9 @@ int checkPosition(int newY, int newX, Player * user)
     int space;
     switch (mvinch(newY, newX)) //Finds the new place to move
     {
-        case '.': // If it is a ., move to it
+        case '.':
+        case '#':
+        case '+':// If it is a ., move to it
             playerMove(newY, newX, user);
             break;
 
